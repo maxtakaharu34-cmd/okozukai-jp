@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+<meta name="theme-color" content="#ffd6e8" />
+<title>おこづかいちょう</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Mochiy+Pop+P+One&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --paper: #fffaf2;
+  --ink: #4a2a1c;
+  --pink: #ff6ea8;
+  --pink-2: #ffb6c7;
+  --sky: #87d2f5;
+  --yellow: #ffd95a;
+  --green: #6fcf80;
+  --red: #ff5577;
+  --line: #f0d8c8;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+body {
+  font-family: "Kosugi Maru", system-ui, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(800px 500px at 20% 10%, rgba(255,200,220,0.55), transparent 70%),
+    radial-gradient(800px 500px at 80% 90%, rgba(180,220,255,0.45), transparent 70%),
+    linear-gradient(180deg, #ffe0ee, #ffe9c8);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+#app {
+  display: flex; flex-direction: column;
+  height: 100dvh; padding: 8px 12px 14px; gap: 8px;
+  max-width: 480px; margin: 0 auto;
+}
+header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.title {
+  font-family: "Mochiy Pop P One", sans-serif;
+  font-size: 22px;
+  color: var(--pink);
+  -webkit-text-stroke: 2.5px #fff; paint-order: stroke fill;
+  text-shadow: 3px 3px 0 var(--ink), 5px 5px 0 var(--yellow);
+  margin: 0; transform: rotate(-2deg);
+}
+.icon-btn {
+  background: #fff; border: 2.5px solid var(--ink); color: var(--ink);
+  padding: 5px 10px; border-radius: 999px; font-size: 13px; font-weight: 900; cursor: pointer;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.icon-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
+
+/* Piggy bank balance hero */
+.balance-card {
+  background: linear-gradient(180deg, #fff7d6, #ffe5b8);
+  border: 3px solid var(--ink); border-radius: 18px;
+  padding: 14px 16px;
+  display: grid; grid-template-columns: auto 1fr;
+  gap: 12px; align-items: center;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.piggy {
+  width: 84px; height: 72px;
+  position: relative;
+  flex-shrink: 0;
+}
+.piggy svg { width: 100%; height: 100%; display: block; }
+.balance-info .lbl {
+  font-size: 11px; opacity: 0.7; letter-spacing: 0.1em; font-weight: bold;
+}
+.balance-info .val {
+  font-family: "Mochiy Pop P One", sans-serif;
+  font-size: 36px; line-height: 1;
+  color: var(--pink);
+  -webkit-text-stroke: 2px #fff; paint-order: stroke fill;
+  text-shadow: 3px 3px 0 var(--ink);
+  font-variant-numeric: tabular-nums;
+  margin-top: 4px;
+}
+.balance-info .delta {
+  font-size: 11px;
+  margin-top: 4px;
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Goal card */
+.goal-card {
+  background: #fff; border: 3px solid var(--ink); border-radius: 16px;
+  padding: 10px 12px; box-shadow: 3px 3px 0 var(--ink);
+}
+.goal-card .top {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 12px; gap: 8px;
+}
+.goal-card .top .name {
+  font-family: "Mochiy Pop P One", sans-serif;
+  font-size: 14px; color: var(--ink);
+}
+.goal-card .top .name.empty { color: #aaa; font-family: inherit; }
+.goal-card .top .pct {
+  font-family: "Mochiy Pop P One", sans-serif;
+  color: var(--pink); font-size: 14px;
+}
+.goal-card .bar-wrap {
+  height: 14px; background: #ffe9c8;
+  border: 2px solid var(--ink); border-radius: 999px;
+  overflow: hidden; margin-top: 6px; position: relative;
+}
+.goal-card .bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--pink-2), var(--pink));
+  transition: width 0.4s;
+  position: relative;
+}
+.goal-card .bar::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(45deg,
+    rgba(255,255,255,0.25) 0 6px, transparent 6px 12px);
+  animation: stripeMove 1s linear infinite;
+}
+@keyframes stripeMove {
+  from { background-position: 0 0; }
+  to   { background-position: 24px 0; }
+}
+.goal-card .meta {
+  display: flex; justify-content: space-between; gap: 8px;
+  margin-top: 6px; font-size: 11px; opacity: 0.75;
+}
+.goal-card .meta .v { color: var(--ink); font-family: "Mochiy Pop P One", sans-serif; }
+.goal-card .empty-msg {
+  text-align: center; font-size: 12px; opacity: 0.6;
+  padding: 6px 0;
+}
+.goal-edit-btn {
+  background: var(--yellow); border: 2px solid var(--ink); color: var(--ink);
+  border-radius: 999px; padding: 3px 12px; font-size: 11px; cursor: pointer;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.goal-edit-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
+
+/* Quick add buttons */
+.quick-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.qbtn {
+  background: #fff; border: 3px solid var(--ink); border-radius: 14px;
+  padding: 12px 6px;
+  font-family: "Mochiy Pop P One", sans-serif; font-size: 16px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.qbtn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.qbtn .ico { font-size: 24px; line-height: 1; }
+.qbtn.in  { background: #d6f5d6; }
+.qbtn.out { background: #ffd6dc; }
+
+/* Records list */
+.list-wrap {
+  flex: 1 1 auto; min-height: 100px; overflow-y: auto;
+  background: #fff; border: 3px solid var(--ink); border-radius: 14px;
+  box-shadow: 3px 3px 0 var(--ink);
+  padding: 6px;
+}
+.list-wrap h3 {
+  margin: 4px 6px 6px;
+  font-family: "Mochiy Pop P One", sans-serif;
+  font-size: 13px; color: var(--pink);
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.list-wrap h3 .count { font-size: 11px; color: var(--ink); opacity: 0.55; }
+.rec {
+  display: grid; grid-template-columns: 38px 1fr auto auto;
+  align-items: center; gap: 8px;
+  padding: 8px 6px; border-top: 1px solid var(--line);
+  font-size: 13px;
+}
+.rec:first-of-type { border-top: 0; }
+.rec .icon {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; border: 2px solid var(--ink);
+}
+.rec .meta { min-width: 0; }
+.rec .meta .cat {
+  font-family: "Mochiy Pop P One", sans-serif; font-size: 13px;
+}
+.rec .meta .note {
+  font-size: 11px; color: var(--ink); opacity: 0.6;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rec .date { font-size: 10px; opacity: 0.55; font-variant-numeric: tabular-nums; }
+.rec .amt {
+  font-family: "Mochiy Pop P One", sans-serif;
+  font-size: 14px; font-variant-numeric: tabular-nums;
+  text-align: right; white-space: nowrap;
+}
+.rec.in  .amt { color: var(--green); }
+.rec.out .amt { color: var(--red); }
+.rec .del {
+  background: none; border: 0; color: #aaa; cursor: pointer;
+  padding: 0 4px; font-size: 14px;
+}
+.rec .del:hover { color: var(--red); }
+.list-empty {
+  padding: 24px 8px; text-align: center; opacity: 0.55; font-size: 13px;
+  white-space: pre-line;
+}
+
+/* Modal */
+.modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px; z-index: 100;
+}
+.modal.show { display: flex; }
+.modal .box {
+  background: #fff; border: 4px solid var(--ink); border-radius: 16px;
+  width: 100%; max-width: 360px;
+  padding: 18px 18px 14px;
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.modal h2 {
+  margin: 0 0 10px;
+  font-family: "Mochiy Pop P One", sans-serif;
+  font-size: 22px; color: var(--pink);
+  -webkit-text-stroke: 2px #fff; paint-order: stroke fill;
+  text-shadow: 2px 2px 0 var(--ink);
+  text-align: center;
+}
+.field { margin: 10px 0; }
+.field label {
+  display: block; font-size: 11px; opacity: 0.7;
+  margin-bottom: 3px; letter-spacing: 0.05em;
+}
+.field input, .field select {
+  width: 100%;
+  font-family: inherit; font-size: 16px; color: var(--ink);
+  background: #fffae8; border: 2px solid var(--ink); border-radius: 10px;
+  padding: 8px 10px;
+}
+.field input[type="number"] {
+  font-family: "Mochiy Pop P One", sans-serif; text-align: right;
+}
+.cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.cat-btn {
+  background: #fffae8; border: 2px solid var(--ink); border-radius: 10px;
+  padding: 6px 2px; cursor: pointer; text-align: center;
+  font-size: 11px; line-height: 1.3;
+}
+.cat-btn .emoji { font-size: 22px; line-height: 1; }
+.cat-btn.on { background: var(--yellow); }
+.modal .actions { display: flex; gap: 8px; margin-top: 12px; }
+.modal .actions button {
+  flex: 1; padding: 10px;
+  font-family: "Mochiy Pop P One", sans-serif; font-size: 15px;
+  border: 2.5px solid var(--ink); border-radius: 10px;
+  cursor: pointer; box-shadow: 2px 2px 0 var(--ink);
+}
+.modal .actions .primary { background: var(--pink); color: #fff; }
+.modal .actions .secondary { background: #fff; color: var(--ink); }
+.modal .actions button:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
+.error {
+  background: #ffe5e5; color: var(--red); border: 1.5px solid var(--red);
+  padding: 6px 10px; border-radius: 8px; font-size: 12px; margin-top: 6px;
+}
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translate(-50%, 30px);
+  background: var(--ink); color: #fff;
+  padding: 8px 16px; border-radius: 999px;
+  font-size: 13px; opacity: 0; transition: 0.25s;
+  z-index: 200;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1 class="title">おこづかいちょう</h1>
+    <div style="display:flex; gap:5px;">
+      <button class="icon-btn" id="btn-share">🔗</button>
+      <button class="icon-btn" id="btn-reset">↺</button>
+    </div>
+  </header>
+
+  <div class="balance-card">
+    <div class="piggy">
+      <svg viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="50" cy="72" rx="32" ry="4" fill="rgba(0,0,0,0.2)"/>
+        <ellipse cx="50" cy="44" rx="34" ry="26" fill="#ffb6c7" stroke="#4a2a1c" stroke-width="3"/>
+        <rect x="22" y="58" width="6" height="14" rx="2" fill="#ffb6c7" stroke="#4a2a1c" stroke-width="2.5"/>
+        <rect x="72" y="58" width="6" height="14" rx="2" fill="#ffb6c7" stroke="#4a2a1c" stroke-width="2.5"/>
+        <ellipse cx="78" cy="46" rx="9" ry="7" fill="#ffb6c7" stroke="#4a2a1c" stroke-width="3"/>
+        <circle cx="76" cy="44" r="1.5" fill="#4a2a1c"/>
+        <circle cx="80" cy="48" r="1.5" fill="#4a2a1c"/>
+        <path d="M 28 32 L 24 22 L 36 28 Z" fill="#ffb6c7" stroke="#4a2a1c" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M 64 32 L 70 22 L 72 32 Z" fill="#ffb6c7" stroke="#4a2a1c" stroke-width="2.5" stroke-linejoin="round"/>
+        <circle cx="40" cy="38" r="3" fill="#4a2a1c"/>
+        <circle cx="58" cy="38" r="3" fill="#4a2a1c"/>
+        <rect x="44" y="22" width="14" height="3" rx="1" fill="#4a2a1c"/>
+        <ellipse cx="32" cy="50" rx="3" ry="2" fill="#ff8aaa" opacity="0.7"/>
+        <ellipse cx="68" cy="50" rx="3" ry="2" fill="#ff8aaa" opacity="0.7"/>
+      </svg>
+    </div>
+    <div class="balance-info">
+      <div class="lbl">のこり</div>
+      <div class="val" id="balance">¥0</div>
+      <div class="delta" id="delta">今月のもらった¥0 / つかった¥0</div>
+    </div>
+  </div>
+
+  <div class="goal-card" id="goal-card">
+    <div class="top">
+      <span class="name empty" id="goal-name">ほしいもの未設定</span>
+      <span class="pct" id="goal-pct"></span>
+    </div>
+    <div class="bar-wrap"><div class="bar" id="goal-bar" style="width:0"></div></div>
+    <div class="meta">
+      <span><span class="v" id="goal-now">¥0</span> / <span class="v" id="goal-target">¥0</span></span>
+      <button class="goal-edit-btn" id="btn-goal">🎯 もくひょう</button>
+    </div>
+  </div>
+
+  <div class="quick-row">
+    <button class="qbtn in"  id="btn-in"><span class="ico">💰</span>もらった</button>
+    <button class="qbtn out" id="btn-out"><span class="ico">🛒</span>つかった</button>
+  </div>
+
+  <div class="list-wrap">
+    <h3>きろく <span class="count" id="rec-count"></span></h3>
+    <div id="rec-list"></div>
+  </div>
+</div>
+
+<!-- Add modal -->
+<div class="modal" id="add-modal">
+  <div class="box">
+    <h2 id="modal-title">もらった</h2>
+    <div class="field">
+      <label>なに？</label>
+      <div class="cat-grid" id="cat-grid"></div>
+    </div>
+    <div class="field">
+      <label>いくら？</label>
+      <input type="number" inputmode="numeric" id="f-amount" placeholder="0" min="1" />
+    </div>
+    <div class="field">
+      <label>いつ？</label>
+      <input type="date" id="f-date" />
+    </div>
+    <div class="field">
+      <label>メモ（じゆう）</label>
+      <input type="text" id="f-note" maxlength="40" placeholder="例: コンビニで" />
+    </div>
+    <div class="error" id="form-error" style="display:none"></div>
+    <div class="actions">
+      <button class="secondary" id="btn-cancel">やめる</button>
+      <button class="primary"   id="btn-save">きろく！</button>
+    </div>
+  </div>
+</div>
+
+<!-- Goal modal -->
+<div class="modal" id="goal-modal">
+  <div class="box">
+    <h2>🎯 もくひょう</h2>
+    <div class="field">
+      <label>ほしいもの</label>
+      <input type="text" id="g-name" maxlength="20" placeholder="例: 新しいゲーム" />
+    </div>
+    <div class="field">
+      <label>いくら？</label>
+      <input type="number" inputmode="numeric" id="g-target" placeholder="0" min="0" />
+    </div>
+    <div class="actions">
+      <button class="secondary" id="btn-goal-clear">けす</button>
+      <button class="primary"   id="btn-goal-save">きめた！</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="okozukai.js" defer></script>
+</body>
+</html>
